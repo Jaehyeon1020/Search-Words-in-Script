@@ -1,4 +1,5 @@
 #include "Functions.h"
+// #include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
 
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
@@ -86,12 +87,12 @@ void printNumber(int num) {
 // read를 통해 표준 입력에서 받은 \n을 \0로 변환(문자열로 만들기)
 void enterToNull(char * str) {
     for(int i = 0; i < BUF_SIZE; i++) {
+        //printf("enterToNull 진입\n");
         if(str[i] == '\n') {
+            //printf("enterToNULL : 위치 %d\n", i);
             str[i] = '\0';
             break;
         }
-
-        i += 1;
     }
 }
 
@@ -140,7 +141,7 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
     }
     
     for(int i = 0; i < strLen; i++) {
-        bufferIdx += i;
+        bufferIdx += 1;
 
         if(userInput[i] != buffer[bufferIdx]) 
             return 0;
@@ -156,41 +157,57 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
 
 
 void findSingleWord(int fd, char * userInput) {
+    //printf("findSingleWord 진입 완료\n"); // test
+
     char buffer[BUF_SIZE];
     int currentIdx = 0; // 현재 checking하는 index 저장
     int currentLine = 0; // 현재 checking하는 line 저장
     int matchingIdx; // 단어가 일치하는 index 저장
     int eofCheck;
     int firstEnterIdx; // 읽은 문자들 중 첫 번째 개행문자의 위치(한 줄의 끝)
-    // 엔터 위치 바로 다음을 파일 포인터가 가리키도록 조정하는 offset(BUF_SIZE - firstEnterIndex + 1)
-    int movingOffset;
+    int lastReadWritePointer = 0; // 누적해서 R/W pointer 위치 계산
 
     while(1) {
+        //printf("findSingleWord while문 진입\n"); // test
+
         currentLine++; // line 1부터 시작
+        //printf("Line number : %d\n",currentLine); // test
 
         if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
+            //printf("findSingleWord: eof 도달\n"); // test
             break; // eof 도달 시 탈출
         }
 
         firstEnterIdx = getFirstEnterIndex(buffer); // 읽어들인 문장에서 첫 번째 엔터의 idx 저장
+        lastReadWritePointer += firstEnterIdx + 1;
+        //printf("findSingleWord: firstEnterIdx %d\n", firstEnterIdx); // test
+        //printf("SEEK_CUR: %d\n", lseek(fd, 0, SEEK_CUR)); // test
 
         // 개행문자 없는 경우 -> 마지막줄임 : 개행문자 있을때만 offset 조정
-        if(firstEnterIdx != -1) {
-            movingOffset = BUF_SIZE - firstEnterIdx + 1;
-            lseek(fd, -movingOffset, SEEK_CUR); // 여기까지 파일 포인터 땡김(이 라인까지 해서 한줄 input)
+        if(firstEnterIdx != -1) { 
+            //printf("findSingleWord: lseek함수 사용 진입\n"); // test
+            //printf("firstEnterIDX: %d\n", firstEnterIdx); // test
+            //printf("movingOffset: %d\n", movingOffset); // test
+            //printf("lseek value: %d\n",lseek(fd, lastReadWritePointer, SEEK_SET)); // test
+            lseek(fd, lastReadWritePointer, SEEK_SET); // 여기까지 파일 포인터 땡김(이 라인까지 해서 한줄 input)
         }
-        
+
         // 현재 읽어들인 줄에서 같은 단어가 있는지 확인: idx 1씩 올리면서 확인
         for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
             if(compareFromIndex(currentIdx, userInput, buffer) == 1) {
                 // currentLine:currentIdx 출력
+                // printf("findSingleWord: 콘솔 출력 하는 부분 진입\n"); // test
+
                 printNumber(currentLine);
                 write(1, ":", 1);
-                printNumber(currentIdx);
+                printNumber(currentIdx+1);
+                write(1, " ", 1);
             }
         }
     }
     
+    //printf("findSingleWord: 함수 종료\n"); // test
+    lseek(fd, 0, SEEK_SET); // 함수 종료 전 r/w포인터 원래대로
     write(1, "\n", 1); // 함수 종료 전 개행
 }
 

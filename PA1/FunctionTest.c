@@ -108,5 +108,13 @@ int main() {
     printNumber(324);
     printf("\n");
 
+    printf("%d\n", stringCompare("abcde\0abcde", "abcde"));
+
+    int i = 8;
+    if((i = 3) == 3) {
+        printf("TRUE\n");
+        printf("i: %d\n",i);
+    }
+
     return 0;
 }
