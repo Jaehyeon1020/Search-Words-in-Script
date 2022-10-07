@@ -1,6 +1,13 @@
 #ifndef _FUNCTIONS_H
 #define _FUNCTIONS_H
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+
 #define BUF_SIZE 1024
 
 void findSingleWord(int fd, char * userInput); // function 1
@@ -12,5 +19,8 @@ int stringCompare(char * str1, char * str2);
 void enterToNull(char * str);
 int isBlankInString(char * str);
 int isStarInString(char * str);
+int getFirstEnterIndex(char * str);
+int compareFromIndex(int checkingIndex, char * userInput, char * buffer);
+void printNumber(int num);
 
 #endif

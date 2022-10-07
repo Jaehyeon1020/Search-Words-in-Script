@@ -4,17 +4,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "functions.h"
+#include "Functions.h"
 
 int main(int argc, char *argv[]) {
     int fd; // file descriptor
     char readBuffer[BUF_SIZE];
-    char writeBuffer[BUF_SIZE];
-
     
     // 파일 열기
     if((fd = open(argv[1], O_RDONLY)) < 0) {
-        perror("open");
+        //perror("open");
         exit(1);
     }
 
@@ -31,7 +29,7 @@ int main(int argc, char *argv[]) {
             break;
         
         // user input이 큰 따옴표로 시작하는 경우: findPhrase() 사용
-        if(readBuffer[0] == "\"") {
+        if(readBuffer[0] == '\"') {
             findPhrase(fd, readBuffer);
         }
         // 큰 따옴표로 시작하지 않으면서 공백문자가 있는 경우: findMultiWord() 사용
@@ -50,7 +48,7 @@ int main(int argc, char *argv[]) {
 
 
     if(close(fd) < 0) {
-        perror("close");
+        //perror("close");
         exit(1);
     }
     
