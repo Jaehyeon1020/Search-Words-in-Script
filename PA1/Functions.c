@@ -1,5 +1,5 @@
 #include "Functions.h"
-// #include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
+#include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
 
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
@@ -41,6 +41,12 @@ int stringCompare(char * str1, char * str2) {
 
 // 숫자 출력 함수(개행이나 공백은 없음)
 void printNumber(int num) {
+    // 0이 숫자로 주어진 경우 0 출력하고 return
+    if(num == 0) {
+        write(1, "0", 1);
+        return;
+    }
+
     int tmp = num; // 임시
     int count = 0; // 자리수
     
@@ -141,15 +147,15 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
     }
     
     for(int i = 0; i < strLen; i++) {
-        bufferIdx += 1;
-
         if(userInput[i] != buffer[bufferIdx]) 
             return 0;
+        
+        bufferIdx += 1;
     }
 
     // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
-    if(buffer[bufferIdx + 1] == '\n' || buffer[bufferIdx + 1] == ' '
-        || buffer[bufferIdx + 1] == '\0')
+    if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
+        || buffer[bufferIdx] == '\0')
         return 1;
     else
         return 0;
@@ -196,11 +202,11 @@ void findSingleWord(int fd, char * userInput) {
         for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
             if(compareFromIndex(currentIdx, userInput, buffer) == 1) {
                 // currentLine:currentIdx 출력
-                // printf("findSingleWord: 콘솔 출력 하는 부분 진입\n"); // test
+                printf("findSingleWord: 콘솔 출력 하는 부분 진입\n"); // test
 
                 printNumber(currentLine);
                 write(1, ":", 1);
-                printNumber(currentIdx+1);
+                printNumber(currentIdx);
                 write(1, " ", 1);
             }
         }

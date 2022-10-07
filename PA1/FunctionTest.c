@@ -57,6 +57,12 @@ int stringCompare(char * str1, char * str2) {
 
 // 숫자 출력 함수(개행이나 공백은 없음)
 void printNumber(int num) {
+    // 0이 숫자로 주어진 경우 0 출력하고 return
+    if(num == 0) {
+        write(1, "0", 1);
+        return;
+    }
+
     int tmp = num; // 임시
     int count = 0; // 자리수
     
@@ -99,22 +105,12 @@ void printNumber(int num) {
     }
 }
 
+
 int main() {
     char buf[1024];
 
-    write(1, "123", 3);
-    write(1, "\n", 1);
-
-    printNumber(324);
+    printNumber(0);
     printf("\n");
-
-    printf("%d\n", stringCompare("abcde\0abcde", "abcde"));
-
-    int i = 8;
-    if((i = 3) == 3) {
-        printf("TRUE\n");
-        printf("i: %d\n",i);
-    }
 
     return 0;
 }
