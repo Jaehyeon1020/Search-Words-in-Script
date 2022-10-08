@@ -156,10 +156,10 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
 
     // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
     if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
-        || buffer[bufferIdx] == '\0') {
+        || buffer[bufferIdx] == '\0' || buffer[bufferIdx] == '\t') {
         // 단어 앞에도 다른 글자 있으면 안됨
         if(buffer[checkingIndex - 1] == '\n' || buffer[checkingIndex - 1] == ' '
-            || buffer[checkingIndex - 1] == '\0')
+            || buffer[checkingIndex - 1] == '\0' || buffer[checkingIndex -1] == '\t')
             return 1;
     }
     else
@@ -198,10 +198,10 @@ int compareCaseFromIndex(int checkingIndex, char * userInput, char * buffer) {
 
     // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
     if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
-        || buffer[bufferIdx] == '\0') {
+        || buffer[bufferIdx] == '\0' || buffer[bufferIdx] == '\t') {
         // 단어 앞에도 다른 글자 있으면 안됨
         if(buffer[checkingIndex - 1] == '\n' || buffer[checkingIndex - 1] == ' '
-            || buffer[checkingIndex - 1] == '\0')
+            || buffer[checkingIndex - 1] == '\0' || buffer[bufferIdx] == '\t')
             return 1;
     }
     else
@@ -238,6 +238,26 @@ void tokenizeString(char * userInput, char ** input1, char ** input2) {
         if(i == secondWordLength)
             (*input2)[i] = '\0'; // 두번째 단어 끝 null문자 삽입
     }
+}
+
+
+// 주어진 문자열 앞 뒤에 있는 따옴표 제거
+void deleteQuotation(char * userInput) {
+    int i;
+    int strLen = 0;
+    
+    // 따옴표 포함 문자열 길이 계산
+    for(i = 0; userInput[i] != '\0'; i++) {
+        strLen++;
+    }
+
+    // strLen번만큼 모든 문자 앞으로 한 idx씩 이동
+    for(i = 0; i < strLen; i++) {
+        userInput[i] = userInput[i + 1];
+    }
+
+    // null문자 한칸 앞으로 이동(마지막 따옴표 사라지면서 그곳이 문장의 끝이 됨)
+    userInput[strLen - 2] = userInput[strLen - 1];
 }
 
 
@@ -350,7 +370,45 @@ void findMultiWord(int fd, char * userInput) {
 
 
 void findPhrase(int fd, char * userInput) {
-    
+    char buffer[BUF_SIZE]; // 단어 찾을 txt파일에서 한 줄 저장
+    int currentIdx = 0;
+    int currentLine = 0;
+    int matchingIdx;
+    int eofCheck;
+    int firstEnterIdx;
+    int lastReadWritePointer = 0;
+
+    // 큰따옴표로 감싸져서 들어온 userInput의 큰따옴표 제거
+    deleteQuotation(userInput);
+
+    while(1) {
+		currentLine++;
+
+        if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
+            break; // eof 도달 시 탈출
+        }
+
+        firstEnterIdx = getFirstEnterIndex(buffer);
+        lastReadWritePointer += firstEnterIdx + 1;
+
+        if(firstEnterIdx != -1) {
+            lseek(fd, lastReadWritePointer, SEEK_SET); // 여기까지 rw포인터 위치(한줄입력 끝)
+        }
+
+        // 현재 읽어들인 줄에서 같은 구가 있는지 확인: idx 1씩 올리며 확인
+        for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
+            if(compareCaseFromIndex(currentIdx, userInput, buffer) == 1) {
+                // currentLine:currentIdx 출력
+                printNumber(currentLine);
+                write(1, ":", 1);
+                printNumber(currentIdx);
+                write(1, " ", 1);
+            }
+        }
+    }
+
+    lseek(fd, 0, SEEK_SET); // 함수 종료 전 rw포인터 초기화
+    write(1, "\n", 1); // 함수 종료 전 개행
 }
 
 

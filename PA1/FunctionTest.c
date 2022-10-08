@@ -136,15 +136,43 @@ void tokenizeString(char * userInput, char ** input1, char ** input2) {
     }
 }
 
+// 주어진 문자열 앞 뒤에 있는 따옴표 제거
+void deleteQuotation(char * userInput) {
+    int i;
+    int strLen = 0;
+    
+    // 따옴표 포함 문자열 길이 계산
+    for(i = 0; userInput[i] != '\0'; i++) {
+        strLen++;
+    }
+
+    printf("strLen: %d\n", strLen);
+
+    // strLen번만큼 모든 문자 앞으로 한 idx씩 이동
+    for(i = 0; i < strLen; i++) {
+        printf("앞으로 한칸씩 이동 : %d\n", i);
+        userInput[i] = userInput[i + 1];
+        printf("userInput[%d] : %d\n", i, userInput[i]);
+    }
+
+    // null문자 한칸 앞으로 이동(마지막 따옴표 사라지면서 그곳이 문장의 끝이 됨)
+    printf("마지막 따옴표 삭제\n");
+    userInput[strLen - 2] = userInput[strLen - 1];
+}
+
 
 int main() {
-    char * userInput_1;
-    char * userInput_2;
+    char arr[3] = {'a','b','c'};
+    arr[0] = arr[1];
+    printf("char arr 0 %c\n", arr[0]);
 
-    tokenizeString("apple bananana", &userInput_1, &userInput_2);
+    char string[] = "\"an ape and banana\"";
+    string[0] = 'a';
+    printf("string[0] : %c\n", string[0]);
 
-    printf("input1 1: %s\n", userInput_1);
-    printf("input2 1: %s\n", userInput_2);
+    printf("함수 실행 전 : %s\n", string);
+    deleteQuotation(string);
+    printf("함수 실행 후 : %s\n", string);
 
     return 0;
 }
