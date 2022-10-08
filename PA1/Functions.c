@@ -1,5 +1,5 @@
 #include "Functions.h"
-// #include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
+//#include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
 
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
@@ -241,6 +241,39 @@ void tokenizeString(char * userInput, char ** input1, char ** input2) {
 }
 
 
+// 단어 * 기준으로 쪼갬
+void tokenizeStringByStar(char * userInput, char ** input1, char ** input2) {
+    int firstWordLength = 0;
+    int secondWordLength = 0;
+    int i;
+
+    // * 기준으로 쪼갬
+    for(i = 0; userInput[i] != '*'; i++)
+        firstWordLength++;
+    
+    for(i = firstWordLength+1; userInput[i] != '\0'; i++)
+        secondWordLength++;
+
+    *input1 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+    *input2 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+
+
+    for(i = 0; i < firstWordLength+1; i++) {
+        (*input1)[i] = userInput[i];
+
+        if(i == firstWordLength)
+            (*input1)[i] = '\0'; // 첫번째 단어 끝 null문자 삽입
+    }
+
+    for(int i = 0; i < secondWordLength + 1; i++) {
+        (*input2)[i] = userInput[firstWordLength + i + 1];
+
+        if(i == secondWordLength)
+            (*input2)[i] = '\0'; // 두번째 단어 끝 null문자 삽입
+    }
+}
+
+
 // 주어진 문자열 앞 뒤에 있는 따옴표 제거
 void deleteQuotation(char * userInput) {
     int i;
@@ -258,6 +291,105 @@ void deleteQuotation(char * userInput) {
 
     // null문자 한칸 앞으로 이동(마지막 따옴표 사라지면서 그곳이 문장의 끝이 됨)
     userInput[strLen - 2] = userInput[strLen - 1];
+}
+
+
+int isExistRegularExpression(int checkingIndex, char * userInput_1, char * userInput_2, char * buffer) {
+    //printf("isExistRegularExpression 진입\n"); // test
+
+    int i;
+    int strLen_1 = 0; // userInput_1 글자수
+    int strLen_2 = 0; // userInput_2 글자수
+    int bufferIdx = checkingIndex;
+    int isExistFirstWord = 1; // 첫 번째 단어가 있으면 set -> 이 이후에 정규표현식인지 확인
+
+    // userInput들의 글자수 계산
+    for(i = 0; userInput_1[i] != '\0'; i++)
+        strLen_1++;
+    for(i = 0; userInput_2[i] != '\0'; i++)
+        strLen_2++;
+
+    // 대문자 있는거 전부 소문자로 변환 : userInput_1
+    for(i = 0; i < strLen_1; i++) {
+        // 대문자인 경우
+        if(65 <= userInput_1[i] && userInput_1[i] <= 90)
+            userInput_1[i] += 32; // 소문자로 변환
+    }
+
+    // 대문자 있는거 전부 소문자로 변환 : userInput_2
+    for(i = 0; i < strLen_2; i++) {
+        // 대문자인 경우
+        if(65 <= userInput_2[i] && userInput_2[i] <= 90)
+            userInput_2[i] += 32; // 소문자로 변환
+    }
+
+    // 대문자 있는거 전부 소문자로 변환 : buffer
+    for(i = 0; i < BUF_SIZE; i++) {
+        // 대문자인 경우
+        if(65 <= buffer[i] && buffer[i] <= 90)
+            buffer[i] += 32; // 소문자로 변환
+    }
+
+    for(i = 0; i < strLen_1; i++) {
+        // 첫 번째 단어와 buffer의 단어가 다른 부분이 있다면 isExistFirstWord = false
+        if(userInput_1[i] != buffer[bufferIdx])
+            isExistFirstWord = 0;
+
+        bufferIdx += 1; // for문 끝까지 돌면 단어 다음 글자의 index가 됨
+    }
+
+    // 첫 번째 단어 buffer에 있으면 : 정규표현식인지 확인
+    if(isExistFirstWord == 1) {
+        int indexToBlank = 0; // buffer에서 다음 공백까지의 글자수 저장
+        int isExistSecondWord = 1; // 두 번째 단어가 포함되는지 저장
+
+        //buffer[i]가 공백이나 탭, 개행, eof를 만날 때까지 계속
+        for(i = bufferIdx; buffer[i] != ' '; i++) {
+            indexToBlank += 1;
+        }
+
+        // 비교할 문자열 길이가 다음 공백까지 길이보다 더 크면 -> 무조건 불일치
+        if(strLen_2 > indexToBlank) {
+            return 0;
+        }
+
+
+        // 다음 공백이나 탭, 개행까지의 글자들을 저장(여기에 word 2가 포함돼있는지 확인)
+        char * strAfterWord = (char *)malloc(sizeof(char) * (indexToBlank + 1));
+
+
+        // buffer에 있던 문자열 strAfterWord로 복사(개행/탭/공백 전까지만)
+        // strAfterWord의 문자열 길이 = indexToBlank
+        for(i = 0; i < indexToBlank; i++) {
+            strAfterWord[i] = buffer[bufferIdx + i];
+        }
+        strAfterWord[indexToBlank] = '\0'; // 문자열 끝 null 삽입
+
+        for(i = 0; i < indexToBlank; i++) {
+            for(int j = 0; j < strLen_2; j++) {
+                // indexOutOfBound
+                if(j + i > indexToBlank)
+                    continue;
+                
+                if(userInput_2[j] != strAfterWord[j + i])
+                    isExistSecondWord = 0;
+            }
+            
+            // 반복문 돌렸는데 일치 했으면
+            if(isExistSecondWord == 1) {
+                free(strAfterWord);
+                return 1;
+            }
+
+            // 다시 1로 되돌림
+            isExistSecondWord = 1;
+        }
+
+        return 0;
+    }
+    else {
+        return 0;
+    }
 }
 
 
@@ -414,5 +546,78 @@ void findPhrase(int fd, char * userInput) {
 
 
 void findRegularExpression(int fd, char * userInput) {
+    //printf("findRegularExpression 진입\n"); // test
 
+    char buffer[BUF_SIZE];
+    int currentIdx = 0;
+    int currentLine = 0;
+    int eofCheck;
+    int firstEnterIdx;
+    int lastReadWritePointer = 0;
+    char * userInput_1; // * 앞 단어
+    char * userInput_2; // * 뒤 단어
+    int isFirstWord = 0;
+    int isSecondWord = 0;
+    int firstWordFindingIndex = 0; // 첫번째 단어 찾은 위치
+    int secondWordFindingIndex = 0; // 두번째 단어 찾은 위치
+    int strLen_1 = 0;
+    
+    tokenizeStringByStar(userInput, &userInput_1, &userInput_2); // * 기준으로 단어 쪼개서 저장
+
+    for(int i = 0; userInput_1[i] != '\0'; i++)
+        strLen_1++; // 첫 단어 길이 계산
+    
+
+    while(1) {
+        currentLine++;
+
+        if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
+            break; // eof 도달 시 탈출
+        }
+
+        firstEnterIdx = getFirstEnterIndex(buffer);
+        lastReadWritePointer += firstEnterIdx + 1;
+
+        // 개행문자 없는 경우 -> 마지막줄 : 개행문자 있을 때만 offset 조정
+        if(firstEnterIdx != -1) {
+            // 이 코드까지 해서 txt파일에서 한 줄 저장
+            lseek(fd, lastReadWritePointer, SEEK_SET);
+        }
+
+        // 현재 줄에 두 단어가 모두 포함되는지 확인
+        for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
+            if(isFirstWord != 1) {
+                if(compareCaseFromIndex(currentIdx, userInput_1, buffer) == 1) {
+                    firstWordFindingIndex = currentIdx;
+                    isFirstWord = 1;
+                }
+            }
+
+            if(compareCaseFromIndex(currentIdx, userInput_2, buffer) == 1) {
+                secondWordFindingIndex = currentIdx;
+                isSecondWord = 1;
+            }
+        }
+
+        // 이 line에 두 단어 모두 존재한다면
+        if(isFirstWord == 1 && isSecondWord == 1) {
+            // 첫 번째 단어가 더 앞에 있다면 -> 정규표현식
+            if(firstWordFindingIndex < secondWordFindingIndex) {
+                if(!((buffer[firstWordFindingIndex + strLen_1] == ' ') && (buffer[firstWordFindingIndex + strLen_1 + 1] == buffer[secondWordFindingIndex]))) {
+                    printNumber(currentLine);
+                    write(1, " ", 1);
+                }
+            }
+        }
+
+        isFirstWord = 0;
+        isSecondWord = 0;
+        firstWordFindingIndex = 0;
+        secondWordFindingIndex = 0; // 다시 받아야 하는 변수들 초기화
+    }
+
+    lseek(fd, 0, SEEK_SET);
+    write(1, "\n", 1);
+    free(userInput_1);
+    free(userInput_2);
 }

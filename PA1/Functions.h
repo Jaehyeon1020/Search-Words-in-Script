@@ -24,6 +24,8 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer);
 int compareCaseFromIndex(int checkingIndex, char * userInput, char * buffer); // 대소문자 구분 없이 비교
 void printNumber(int num);
 void tokenizeString(char * userInput, char ** input1, char ** input2);
+void tokenizeStringByStar(char * userInput, char ** input1, char ** input2);
 void deleteQuotation(char * userInput);
-
+int isExistRegularExpression(int checkingIndex, char * userInput_1, char * userInput_2, char * buffer);
+int compareCaseFromIndex_ReturnIndex(int checkingIndex, char * userInput, char * buffer);
 #endif
