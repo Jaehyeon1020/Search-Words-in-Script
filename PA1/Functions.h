@@ -21,6 +21,8 @@ int isBlankInString(char * str);
 int isStarInString(char * str);
 int getFirstEnterIndex(char * str);
 int compareFromIndex(int checkingIndex, char * userInput, char * buffer);
+int compareCaseFromIndex(int checkingIndex, char * userInput, char * buffer); // 대소문자 구분 없이 비교
 void printNumber(int num);
+void tokenizeString(char * userInput, char ** input1, char ** input2);
 
 #endif

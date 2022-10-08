@@ -6,7 +6,7 @@
 #include <errno.h>
 #include "Functions.h"
 
-// #include <stdio.h> // 지워야됨 지워야됨 지워야됨 지워야됨 테스트용
+//#include <stdio.h> // 지워야됨 지워야됨 지워야됨 지워야됨 테스트용
 
 int main(int argc, char *argv[]) {
     int fd; // file descriptor
@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
     
     // 파일 열기
     if((fd = open(argv[1], O_RDONLY)) < 0) {
-        //printf("error\n"); // test
         exit(1);
     }
 
@@ -23,12 +22,9 @@ int main(int argc, char *argv[]) {
      * 참고: fd=0 표준 입력, fd=1 표준 출력, fd=2 표준에러
      */
     while(1) {
-        //printf("main함수 while문 진입\n"); // test
 
         read(0, readBuffer, sizeof(readBuffer)); // user input을 readBuffer에 저장
-        //printf("readbuffer1: %s\n", readBuffer); // test
         enterToNull(readBuffer); // 개행문자 널문자로 교체
-        //printf("readbuffer2 : %s\n", readBuffer); // test
 
         // PA1EXIT 입력된경우 종료
         if(stringCompare(readBuffer, "PA1EXIT") == 1)
@@ -48,14 +44,12 @@ int main(int argc, char *argv[]) {
         }
         // 그 외: findSingleWord() 사용
         else {
-            //printf("findSingleWord 함수 진입 전\n"); // test
             findSingleWord(fd, readBuffer);
         }
     }
 
 
     if(close(fd) < 0) {
-        //perror("close");
         exit(1);
     }
     

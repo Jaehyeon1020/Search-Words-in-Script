@@ -1,5 +1,5 @@
 #include "Functions.h"
-#include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
+// #include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
 
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
@@ -138,6 +138,7 @@ int getFirstEnterIndex(char * str) {
 
 // checkingIndex로부터 주어진 두 개의 문자열을 비교함
 // 두 문자열이 일치하면 1 반환, 같지 않으면 0 반환
+// 대소문자를 구분함
 int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
     int strLen = 0; // str의 글자 수
     int bufferIdx = checkingIndex;
@@ -155,17 +156,95 @@ int compareFromIndex(int checkingIndex, char * userInput, char * buffer) {
 
     // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
     if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
-        || buffer[bufferIdx] == '\0')
-        return 1;
+        || buffer[bufferIdx] == '\0') {
+        // 단어 앞에도 다른 글자 있으면 안됨
+        if(buffer[checkingIndex - 1] == '\n' || buffer[checkingIndex - 1] == ' '
+            || buffer[checkingIndex - 1] == '\0')
+            return 1;
+    }
     else
         return 0;
+}
+
+
+// 대소문자 구분 없이 비교하는 compareFromIndex()
+// 대문자 ASCII 번호 + 32 = 소문자 ASCII 번호(A: 65, Z: 90)
+int compareCaseFromIndex(int checkingIndex, char * userInput, char * buffer) {
+    int strLen = 0; // str의 글자 수
+    int bufferIdx = checkingIndex;
+    int i = 0;
+    
+    for(i = 0; userInput[i] != '\0'; i++) {
+        strLen++;
+    }
+
+    // 대문자 있는거 전부 소문자로 변환
+    for(i = 0; i < strLen; i++) {
+        // 대문자인 경우
+        if(65 <= userInput[i] && userInput[i] <= 90)
+            userInput[i] += 32; // 소문자로 변환
+        
+        if(65 <= buffer[checkingIndex + i] && buffer[checkingIndex + i] <= 90)
+            buffer[checkingIndex + i] += 32;
+    }
+    
+    // 단어끼리 비교
+    for(i = 0; i < strLen; i++) {
+        if(userInput[i] != buffer[bufferIdx]) 
+            return 0;
+        
+        bufferIdx += 1;
+    }
+
+    // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
+    if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
+        || buffer[bufferIdx] == '\0') {
+        // 단어 앞에도 다른 글자 있으면 안됨
+        if(buffer[checkingIndex - 1] == '\n' || buffer[checkingIndex - 1] == ' '
+            || buffer[checkingIndex - 1] == '\0')
+            return 1;
+    }
+    else
+        return 0;
+}
+
+
+// 두 개의 단어 공백으로 구분된 input과 포인터 두개 받아서 각각에 저장
+void tokenizeString(char * userInput, char ** input1, char ** input2) {
+    int firstWordLength = 0;
+    int secondWordLength = 0;
+    int i;
+
+    for(i = 0; userInput[i] != ' '; i++)
+        firstWordLength++;
+    
+    for(i = firstWordLength+1; userInput[i] != '\0'; i++)
+        secondWordLength++;
+
+    *input1 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+    *input2 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+
+
+    for(i = 0; i < firstWordLength+1; i++) {
+        (*input1)[i] = userInput[i];
+
+        if(i == firstWordLength)
+            (*input1)[i] = '\0'; // 첫번째 단어 끝 null문자 삽입
+    }
+
+    for(int i = 0; i < secondWordLength + 1; i++) {
+        (*input2)[i] = userInput[firstWordLength + i + 1];
+
+        if(i == secondWordLength)
+            (*input2)[i] = '\0'; // 두번째 단어 끝 null문자 삽입
+    }
 }
 
 
 void findSingleWord(int fd, char * userInput) {
     //printf("findSingleWord 진입 완료\n"); // test
 
-    char buffer[BUF_SIZE];
+    char buffer[BUF_SIZE]; // 단어를 찾을 txt파일에서 한줄씩 불러와서 저장
     int currentIdx = 0; // 현재 checking하는 index 저장
     int currentLine = 0; // 현재 checking하는 line 저장
     int matchingIdx; // 단어가 일치하는 index 저장
@@ -177,33 +256,26 @@ void findSingleWord(int fd, char * userInput) {
         //printf("findSingleWord while문 진입\n"); // test
 
         currentLine++; // line 1부터 시작
-        //printf("Line number : %d\n",currentLine); // test
 
         if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
-            //printf("findSingleWord: eof 도달\n"); // test
             break; // eof 도달 시 탈출
         }
 
         firstEnterIdx = getFirstEnterIndex(buffer); // 읽어들인 문장에서 첫 번째 엔터의 idx 저장
         lastReadWritePointer += firstEnterIdx + 1;
-        //printf("findSingleWord: firstEnterIdx %d\n", firstEnterIdx); // test
-        //printf("SEEK_CUR: %d\n", lseek(fd, 0, SEEK_CUR)); // test
 
         // 개행문자 없는 경우 -> 마지막줄임 : 개행문자 있을때만 offset 조정
         if(firstEnterIdx != -1) { 
             //printf("findSingleWord: lseek함수 사용 진입\n"); // test
-            //printf("firstEnterIDX: %d\n", firstEnterIdx); // test
-            //printf("movingOffset: %d\n", movingOffset); // test
+            //printf("firstEnterIdx: %d\n", firstEnterIdx); // test
             //printf("lseek value: %d\n",lseek(fd, lastReadWritePointer, SEEK_SET)); // test
             lseek(fd, lastReadWritePointer, SEEK_SET); // 여기까지 파일 포인터 땡김(이 라인까지 해서 한줄 input)
         }
 
         // 현재 읽어들인 줄에서 같은 단어가 있는지 확인: idx 1씩 올리면서 확인
         for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
-            if(compareFromIndex(currentIdx, userInput, buffer) == 1) {
+            if(compareCaseFromIndex(currentIdx, userInput, buffer) == 1) {
                 // currentLine:currentIdx 출력
-                printf("findSingleWord: 콘솔 출력 하는 부분 진입\n"); // test
-
                 printNumber(currentLine);
                 write(1, ":", 1);
                 printNumber(currentIdx);
@@ -219,7 +291,61 @@ void findSingleWord(int fd, char * userInput) {
 
 
 void findMultiWord(int fd, char * userInput) {
+    char buffer[BUF_SIZE]; // 단어 찾을 txt파일 한 줄씩 저장
+    int currentIdx = 0; // 현재 checking하는 index 저장
+    int currentLine = 0; // 현재 checking하는 line 저장
+    int eofCheck;
+    int firstEnterIdx; // 읽은 문자들 중 첫 번째 개행문자의 위치
+    int lastReadWritePointer = 0; // 누적해서 lseek 사용
+    char * userInput_1; // 단어 두개 받은 것 중 앞
+    char * userInput_2; // 단어 두개 받은 것 중 뒤
+    int isFirstWord = 0; // 이 line에 첫 번째 단어 있는지 확인
+    int isSecondWord = 0; // 이 line에 두 번째 단어 있는지 확인
 
+    tokenizeString(userInput, &userInput_1, &userInput_2); // 공백 기준으로 단어 쪼개서 저장
+
+    while(1) {
+        currentLine++;
+
+        if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
+            break; // eof 도달 시 탈출
+        }
+
+        firstEnterIdx = getFirstEnterIndex(buffer); // 읽어들인 문장에서 첫 번째 엔터의 index 저장
+        lastReadWritePointer += firstEnterIdx + 1; // lseek 움직일 위치 누적
+        
+        // 개행문자 없는 경우 -> 마지막줄 : 개행문자 있을 때만 offset 조정
+        if(firstEnterIdx != -1) {
+            // 이 코드까지 해서 txt파일에서 한 줄 저장
+            lseek(fd, lastReadWritePointer, SEEK_SET);
+        }
+
+        // 한 index에서 두 단어 모두 비교하고 단어 있으면 isFirstWord, isSecondWord set
+        // for문 종료 후 isFirstWord = isSecondWord == 1이면 lineNumber 출력
+        for(currentIdx = 0; currentIdx < firstEnterIdx; currentIdx++) {
+            if(compareCaseFromIndex(currentIdx, userInput_1, buffer) == 1)  {
+                isFirstWord = 1;
+            }
+
+            if(compareCaseFromIndex(currentIdx, userInput_2, buffer) == 1) {
+                isSecondWord = 1;
+            }
+        }
+
+        // 현재 line에 두 단어가 모두 존재한다면
+        if(isFirstWord == 1 && isSecondWord == 1) {
+            printNumber(currentLine);
+            write(1, " ", 1);
+        }
+
+        isFirstWord = 0; // 1 line 검색 후 초기화
+        isSecondWord = 0; // 1 line 검색 후 초기화
+    }
+
+    lseek(fd, 0, SEEK_SET); // 함주 종료 전 rw포인터 초기화
+    write(1, "\n", 1); // 함수 종료 전 개행
+    free(userInput_1);
+    free(userInput_2);
 }
 
 

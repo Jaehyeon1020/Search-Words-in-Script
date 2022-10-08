@@ -105,12 +105,46 @@ void printNumber(int num) {
     }
 }
 
+// 두 개의 단어 공백으로 구분된 input과 포인터 두개 받아서 각각에 저장
+void tokenizeString(char * userInput, char ** input1, char ** input2) {
+    int firstWordLength = 0;
+    int secondWordLength = 0;
+    int i;
+
+    for(i = 0; userInput[i] != ' '; i++)
+        firstWordLength++;
+    
+    for(i = firstWordLength+1; userInput[i] != '\0'; i++)
+        secondWordLength++;
+
+    *input1 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+    *input2 = (char*)malloc(sizeof(char) * (firstWordLength + 1));
+
+
+    for(i = 0; i < firstWordLength+1; i++) {
+        (*input1)[i] = userInput[i];
+
+        if(i == firstWordLength)
+            (*input1)[i] = '\0'; // 첫번째 단어 끝 null문자 삽입
+    }
+
+    for(int i = 0; i < secondWordLength + 1; i++) {
+        (*input2)[i] = userInput[firstWordLength + i + 1];
+
+        if(i == secondWordLength)
+            (*input2)[i] = '\0'; // 두번째 단어 끝 null문자 삽입
+    }
+}
+
 
 int main() {
-    char buf[1024];
+    char * userInput_1;
+    char * userInput_2;
 
-    printNumber(0);
-    printf("\n");
+    tokenizeString("apple bananana", &userInput_1, &userInput_2);
+
+    printf("input1 1: %s\n", userInput_1);
+    printf("input2 1: %s\n", userInput_2);
 
     return 0;
 }
