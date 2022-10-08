@@ -4,3 +4,7 @@ hello apple banana
 HIabcdHELLO hi
 hello hihellohi
 apple banana kiwi
+apple apple kiwi banana ape
+
+Apple kIwi drill still apple
+abcde abcde still apple

@@ -196,7 +196,7 @@ int compareCaseFromIndex(int checkingIndex, char * userInput, char * buffer) {
         bufferIdx += 1;
     }
 
-    // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것
+    // 단어 뒤에 다른 글자 붙어있지 않아야 찾는 단어가 있는 것 or 단어 뒤가 파일 끝
     if(buffer[bufferIdx] == '\n' || buffer[bufferIdx] == ' '
         || buffer[bufferIdx] == '\0' || buffer[bufferIdx] == '\t') {
         // 단어 앞에도 다른 글자 있으면 안됨
@@ -276,6 +276,7 @@ void findSingleWord(int fd, char * userInput) {
         //printf("findSingleWord while문 진입\n"); // test
 
         currentLine++; // line 1부터 시작
+        //printf("current line: %d\n", currentLine); // test
 
         if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
             break; // eof 도달 시 탈출
