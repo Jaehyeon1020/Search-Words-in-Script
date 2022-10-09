@@ -1,5 +1,4 @@
 #include "Functions.h"
-//#include <stdio.h> // 테스트용 지워야됨 지워야됨 지워야됨
 
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
@@ -93,9 +92,7 @@ void printNumber(int num) {
 // read를 통해 표준 입력에서 받은 \n을 \0로 변환(문자열로 만들기)
 void enterToNull(char * str) {
     for(int i = 0; i < BUF_SIZE; i++) {
-        //printf("enterToNull 진입\n");
         if(str[i] == '\n') {
-            //printf("enterToNULL : 위치 %d\n", i);
             str[i] = '\0';
             break;
         }
@@ -294,107 +291,7 @@ void deleteQuotation(char * userInput) {
 }
 
 
-int isExistRegularExpression(int checkingIndex, char * userInput_1, char * userInput_2, char * buffer) {
-    //printf("isExistRegularExpression 진입\n"); // test
-
-    int i;
-    int strLen_1 = 0; // userInput_1 글자수
-    int strLen_2 = 0; // userInput_2 글자수
-    int bufferIdx = checkingIndex;
-    int isExistFirstWord = 1; // 첫 번째 단어가 있으면 set -> 이 이후에 정규표현식인지 확인
-
-    // userInput들의 글자수 계산
-    for(i = 0; userInput_1[i] != '\0'; i++)
-        strLen_1++;
-    for(i = 0; userInput_2[i] != '\0'; i++)
-        strLen_2++;
-
-    // 대문자 있는거 전부 소문자로 변환 : userInput_1
-    for(i = 0; i < strLen_1; i++) {
-        // 대문자인 경우
-        if(65 <= userInput_1[i] && userInput_1[i] <= 90)
-            userInput_1[i] += 32; // 소문자로 변환
-    }
-
-    // 대문자 있는거 전부 소문자로 변환 : userInput_2
-    for(i = 0; i < strLen_2; i++) {
-        // 대문자인 경우
-        if(65 <= userInput_2[i] && userInput_2[i] <= 90)
-            userInput_2[i] += 32; // 소문자로 변환
-    }
-
-    // 대문자 있는거 전부 소문자로 변환 : buffer
-    for(i = 0; i < BUF_SIZE; i++) {
-        // 대문자인 경우
-        if(65 <= buffer[i] && buffer[i] <= 90)
-            buffer[i] += 32; // 소문자로 변환
-    }
-
-    for(i = 0; i < strLen_1; i++) {
-        // 첫 번째 단어와 buffer의 단어가 다른 부분이 있다면 isExistFirstWord = false
-        if(userInput_1[i] != buffer[bufferIdx])
-            isExistFirstWord = 0;
-
-        bufferIdx += 1; // for문 끝까지 돌면 단어 다음 글자의 index가 됨
-    }
-
-    // 첫 번째 단어 buffer에 있으면 : 정규표현식인지 확인
-    if(isExistFirstWord == 1) {
-        int indexToBlank = 0; // buffer에서 다음 공백까지의 글자수 저장
-        int isExistSecondWord = 1; // 두 번째 단어가 포함되는지 저장
-
-        //buffer[i]가 공백이나 탭, 개행, eof를 만날 때까지 계속
-        for(i = bufferIdx; buffer[i] != ' '; i++) {
-            indexToBlank += 1;
-        }
-
-        // 비교할 문자열 길이가 다음 공백까지 길이보다 더 크면 -> 무조건 불일치
-        if(strLen_2 > indexToBlank) {
-            return 0;
-        }
-
-
-        // 다음 공백이나 탭, 개행까지의 글자들을 저장(여기에 word 2가 포함돼있는지 확인)
-        char * strAfterWord = (char *)malloc(sizeof(char) * (indexToBlank + 1));
-
-
-        // buffer에 있던 문자열 strAfterWord로 복사(개행/탭/공백 전까지만)
-        // strAfterWord의 문자열 길이 = indexToBlank
-        for(i = 0; i < indexToBlank; i++) {
-            strAfterWord[i] = buffer[bufferIdx + i];
-        }
-        strAfterWord[indexToBlank] = '\0'; // 문자열 끝 null 삽입
-
-        for(i = 0; i < indexToBlank; i++) {
-            for(int j = 0; j < strLen_2; j++) {
-                // indexOutOfBound
-                if(j + i > indexToBlank)
-                    continue;
-                
-                if(userInput_2[j] != strAfterWord[j + i])
-                    isExistSecondWord = 0;
-            }
-            
-            // 반복문 돌렸는데 일치 했으면
-            if(isExistSecondWord == 1) {
-                free(strAfterWord);
-                return 1;
-            }
-
-            // 다시 1로 되돌림
-            isExistSecondWord = 1;
-        }
-
-        return 0;
-    }
-    else {
-        return 0;
-    }
-}
-
-
 void findSingleWord(int fd, char * userInput) {
-    //printf("findSingleWord 진입 완료\n"); // test
 
     char buffer[BUF_SIZE]; // 단어를 찾을 txt파일에서 한줄씩 불러와서 저장
     int currentIdx = 0; // 현재 checking하는 index 저장
@@ -405,10 +302,7 @@ void findSingleWord(int fd, char * userInput) {
     int lastReadWritePointer = 0; // 누적해서 R/W pointer 위치 계산
 
     while(1) {
-        //printf("findSingleWord while문 진입\n"); // test
-
         currentLine++; // line 1부터 시작
-        //printf("current line: %d\n", currentLine); // test
 
         if((eofCheck = read(fd, buffer, sizeof(buffer))) == 0) {
             break; // eof 도달 시 탈출
@@ -419,9 +313,6 @@ void findSingleWord(int fd, char * userInput) {
 
         // 개행문자 없는 경우 -> 마지막줄임 : 개행문자 있을때만 offset 조정
         if(firstEnterIdx != -1) { 
-            //printf("findSingleWord: lseek함수 사용 진입\n"); // test
-            //printf("firstEnterIdx: %d\n", firstEnterIdx); // test
-            //printf("lseek value: %d\n",lseek(fd, lastReadWritePointer, SEEK_SET)); // test
             lseek(fd, lastReadWritePointer, SEEK_SET); // 여기까지 파일 포인터 땡김(이 라인까지 해서 한줄 input)
         }
 
@@ -437,7 +328,6 @@ void findSingleWord(int fd, char * userInput) {
         }
     }
     
-    //printf("findSingleWord: 함수 종료\n"); // test
     lseek(fd, 0, SEEK_SET); // 함수 종료 전 r/w포인터 원래대로
     write(1, "\n", 1); // 함수 종료 전 개행
 }
@@ -546,8 +436,6 @@ void findPhrase(int fd, char * userInput) {
 
 
 void findRegularExpression(int fd, char * userInput) {
-    //printf("findRegularExpression 진입\n"); // test
-
     char buffer[BUF_SIZE];
     int currentIdx = 0;
     int currentLine = 0;

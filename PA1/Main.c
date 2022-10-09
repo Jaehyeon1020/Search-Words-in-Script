@@ -6,7 +6,6 @@
 #include <errno.h>
 #include "Functions.h"
 
-//#include <stdio.h> // 지워야됨 지워야됨 지워야됨 지워야됨 테스트용
 
 int main(int argc, char *argv[]) {
     int fd; // file descriptor
