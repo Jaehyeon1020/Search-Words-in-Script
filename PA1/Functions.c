@@ -1,5 +1,7 @@
 #include "Functions.h"
 
+//#include <stdio.h> // test 지워야됨
+
 // str1과 str2가 같으면 1 반환, 같지 않으면 -1 반환
 int stringCompare(char * str1, char * str2) {
     int i=0;
@@ -323,7 +325,25 @@ void findSingleWord(int fd, char * userInput) {
                 printNumber(currentLine);
                 write(1, ":", 1);
                 printNumber(currentIdx);
-                write(1, " ", 1);
+                write(1, " ", 1); // 맨 마지막에 공백 들어가서 바꿔야됨
+
+                // int ifMatchingThisLine = 0; // 현재 check중인 line에 더 매칭되는 단어가 있는지 확인
+                // for(int j = currentIdx + 1; j < firstEnterIdx; j++) {
+                //     if(compareCaseFromIndex(j, userInput, buffer) == 1) {
+                //         ifMatchingThisLine = 1;
+                //     }
+                // }
+                
+                // eofCheck = read(fd, buffer, sizeof(buffer));
+                // lseek(fd, -BUF_SIZE, SEEK_CUR);
+                // // 현재 줄에 더 이상 matching되는 단어 없으면
+                // if(ifMatchingThisLine == 0) {
+                //     // 이게 마지막 줄인지 확인 : 마지막줄 아니면
+                //     if(eofCheck != 0)
+                //         write(1, " ", 1); // 공백 삽입
+                // }
+                // else
+                //     write(1, " ", 1);
             }
         }
     }
@@ -381,6 +401,12 @@ void findMultiWord(int fd, char * userInput) {
             write(1, " ", 1);
         }
 
+        // // 지금이 마지막줄이 아니라면 공백 삽입
+        // eofCheck = read(fd,buffer, sizeof(buffer));
+        // lseek(fd, -BUF_SIZE, SEEK_CUR);
+        // if(eofCheck != 0 && isFirstWord == 1 && isSecondWord == 1)
+        //     write(1, " ", 1);
+
         isFirstWord = 0; // 1 line 검색 후 초기화
         isSecondWord = 0; // 1 line 검색 후 초기화
     }
@@ -426,6 +452,24 @@ void findPhrase(int fd, char * userInput) {
                 write(1, ":", 1);
                 printNumber(currentIdx);
                 write(1, " ", 1);
+
+                // int ifMatchingThisLine = 0; // 현재 check중인 line에 더 매칭되는 단어가 있는지 확인
+                // for(int j = currentIdx + 1; j < firstEnterIdx; j++) {
+                //     if(compareCaseFromIndex(j, userInput, buffer) == 1) {
+                //         ifMatchingThisLine = 1;
+                //     }
+                // }
+                
+                // eofCheck = read(fd, buffer, sizeof(buffer));
+                // lseek(fd, -BUF_SIZE, SEEK_CUR);
+                // // 현재 줄에 더 이상 matching되는 단어 없으면
+                // if(ifMatchingThisLine == 0) {
+                //     // 이게 마지막 줄인지 확인 : 마지막줄 아니면
+                //     if(eofCheck != 0)
+                //         write(1, " ", 1); // 공백 삽입
+                // }
+                // else
+                //     write(1, " ", 1);
             }
         }
     }
@@ -449,6 +493,7 @@ void findRegularExpression(int fd, char * userInput) {
     int firstWordFindingIndex = 0; // 첫번째 단어 찾은 위치
     int secondWordFindingIndex = 0; // 두번째 단어 찾은 위치
     int strLen_1 = 0;
+    //int isRegular = 0; // re이면 1 set
     
     tokenizeStringByStar(userInput, &userInput_1, &userInput_2); // * 기준으로 단어 쪼개서 저장
 
@@ -492,14 +537,21 @@ void findRegularExpression(int fd, char * userInput) {
             // 첫 번째 단어가 더 앞에 있다면 -> 정규표현식
             if(firstWordFindingIndex < secondWordFindingIndex) {
                 if(!((buffer[firstWordFindingIndex + strLen_1] == ' ') && (buffer[firstWordFindingIndex + strLen_1 + 1] == buffer[secondWordFindingIndex]))) {
+                    //isRegular = 1;
                     printNumber(currentLine);
                     write(1, " ", 1);
+
+                    // eofCheck = read(fd, buffer, sizeof(buffer));
+                    // lseek(fd, -BUF_SIZE, SEEK_CUR);
+                    // if(eofCheck != 0)
+                    //     write(1, " ", 1);
                 }
             }
         }
 
         isFirstWord = 0;
         isSecondWord = 0;
+        //isRegular = 0;
         firstWordFindingIndex = 0;
         secondWordFindingIndex = 0; // 다시 받아야 하는 변수들 초기화
     }

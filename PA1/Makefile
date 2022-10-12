@@ -9,6 +9,7 @@ Main.o : Main.c
 	$(CXX) -c Main.c
 
 Functions.o : Functions.c
+	$(CXX) -c Functions.c
 
 clean:
 	rm *.o pa1
